@@ -14,3 +14,71 @@ model Lead {
   use_case  String   @default("")
   createdAt DateTime @default(now())
 }
+
+// ─── Motor de Consentimento ─────────────────────────────────────────────────
+
+model User {
+  id              String   @id @default(cuid())
+  email           String   @unique
+  name            String?
+  passwordHash    String?
+  mfaEnabled      Boolean  @default(false)
+  mfaSecret       String?
+  verifiedAt      DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  consents        Consent[]
+  dataConnections DataConnection[]
+}
+
+/// Registro granular de consentimentos (Art. 7º e 8º LGPD)
+model Consent {
+  id          String        @id @default(cuid())
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Categoria de dado: "financial", "location", "behavioral", "identity"
+  dataCategory String
+  /// Finalidade específica da coleta/compartilhamento
+  purpose     String
+  /// Empresa/parceiro receptor dos dados
+  recipientId String
+  /// Validade do consentimento (null = sem prazo)
+  expiresAt   DateTime?
+  /// "active" | "revoked" | "expired"
+  status      String        @default("active")
+  grantedAt   DateTime      @default(now())
+  revokedAt   DateTime?
+
+  logs        ConsentLog[]
+}
+
+/// Log imutável de auditoria — cada linha é append-only (ANPD art. 6º, X)
+model ConsentLog {
+  id          String   @id @default(cuid())
+  consentId   String
+  consent     Consent  @relation(fields: [consentId], references: [id], onDelete: Cascade)
+  /// "granted" | "revoked" | "updated" | "expired"
+  action      String
+  /// IP ou identificador do agente que realizou a ação
+  actorIp     String?
+  metadata    String?  // JSON serializado
+  createdAt   DateTime @default(now())
+}
+
+/// Metadados de conexões via Open Finance (Pluggy/Belvo)
+model DataConnection {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Provedor: "pluggy" | "belvo"
+  provider     String
+  /// Item ID retornado pelo provedor (opaco)
+  externalId   String
+  /// "pending" | "connected" | "error" | "disconnected"
+  status       String   @default("pending")
+  institution  String?
+  lastSyncedAt DateTime?
+  connectedAt  DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}

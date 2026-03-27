@@ -1,8 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "DataBank – Inteligência de Dados para Startups",
@@ -17,7 +14,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body className={inter.className}>{children}</body>
+      <body style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif" }}>{children}</body>
     </html>
   );
 }
