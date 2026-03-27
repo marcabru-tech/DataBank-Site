@@ -10,7 +10,7 @@ test.describe("Homepage", () => {
   test("shows feature grid", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByText("Tudo que você precisa para decidir melhor")).toBeVisible();
-    await expect(page.getByText("Tempo real")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Tempo real" })).toBeVisible();
   });
 
   test("lead form submits successfully", async ({ page }) => {
