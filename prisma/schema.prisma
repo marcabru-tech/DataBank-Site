@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -62,7 +62,7 @@ model ConsentLog {
   action      String
   /// IP ou identificador do agente que realizou a ação
   actorIp     String?
-  metadata    String?  // JSON serializado
+  metadata    Json?
   createdAt   DateTime @default(now())
 }
 

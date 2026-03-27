@@ -40,7 +40,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         consentId: id,
         action: "revoked",
         actorIp: ip,
-        metadata: JSON.stringify({ revokedAt: now.toISOString() }),
+        metadata: { revokedAt: now.toISOString() },
       },
     }),
   ]);

@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
         create: {
           action: "granted",
           actorIp: ip,
-          metadata: JSON.stringify({ dataCategory, purpose, recipientId }),
+          metadata: { dataCategory, purpose, recipientId },
         },
       },
     },

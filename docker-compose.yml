@@ -1,12 +1,33 @@
 version: "3.9"
 services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: databank
+      POSTGRES_USER: databank
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-databank}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U databank"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   app:
     build: .
     ports:
       - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
     environment:
-      - DATABASE_URL=file:./data/db.sqlite
+      - DATABASE_URL=postgresql://databank:${POSTGRES_PASSWORD:-databank}@db:5432/databank
       - LOG_LEVEL=info
       - PERSIST_LEADS=false
-    volumes:
-      - ./data:/app/data
+
+volumes:
+  postgres_data:

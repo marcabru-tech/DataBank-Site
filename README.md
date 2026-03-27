@@ -5,7 +5,7 @@ Plataforma de **monetização de dados com consentimento explícito**, focada em
 ## Stack
 
 - **Next.js 15** (App Router) + TypeScript + Tailwind CSS
-- **Prisma** (SQLite) — modelos: Lead, User, Consent, ConsentLog, DataConnection
+- **Prisma** (PostgreSQL) — modelos: Lead, User, Consent, ConsentLog, DataConnection
 - **NextAuth v4** — autenticação com suporte a MFA (TOTP)
 - **Pino** — logging estruturado de auditoria
 - **Jest + Testing Library** — testes unitários (30 testes)
@@ -59,27 +59,69 @@ Acesse [http://localhost:3000](http://localhost:3000).
 cp .env.example .env.local
 # Edite .env.local com suas chaves
 
-# 2. Inicialize o banco de dados
-DATABASE_URL="file:./data/db.sqlite" pnpm prisma migrate dev --name consent_engine_mvp
+# 2. Inicialize o banco de dados (requer PostgreSQL acessível via DATABASE_URL)
+pnpm prisma migrate dev --name consent_engine_mvp
 
 # 3. Inicie com persistência ativada
-PERSIST_LEADS=true DATABASE_URL="file:./data/db.sqlite" pnpm dev
+PERSIST_LEADS=true pnpm dev
 ```
 
 ## Variáveis de ambiente
 
-| Variável                      | Padrão  | Descrição                                                   |
-| ----------------------------- | ------- | ----------------------------------------------------------- |
-| `DATABASE_URL`                | —       | URL do banco SQLite (ex.: `file:./db.sqlite`)               |
-| `NEXTAUTH_URL`                | —       | URL base da aplicação (ex.: `http://localhost:3000`)        |
-| `NEXTAUTH_SECRET`             | —       | Segredo JWT para NextAuth (gere com `openssl rand -hex 32`) |
-| `LOG_LEVEL`                   | `info`  | Nível de log do Pino                                        |
-| `PERSIST_LEADS`               | `false` | Se `true`, salva leads no banco via Prisma                  |
-| `OPEN_FINANCE_PROVIDER`       | —       | `pluggy` ou `belvo`                                         |
-| `OPEN_FINANCE_CLIENT_ID`      | —       | Client ID do provedor Open Finance                          |
-| `OPEN_FINANCE_CLIENT_SECRET`  | —       | Client Secret do provedor Open Finance                      |
-| `OPEN_FINANCE_WEBHOOK_SECRET` | —       | Segredo HMAC para verificação de webhooks                   |
-| `OPEN_FINANCE_MOCK`           | `false` | Se `true`, usa respostas mock (sem credenciais reais)       |
+| Variável                      | Padrão  | Descrição                                                                                      |
+| ----------------------------- | ------- | ---------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`                | —       | URL do banco PostgreSQL (ex.: `postgresql://user:password@host:5432/databank?sslmode=require`) |
+| `NEXTAUTH_URL`                | —       | URL base da aplicação (ex.: `http://localhost:3000`)                                           |
+| `NEXTAUTH_SECRET`             | —       | Segredo JWT para NextAuth (gere com `openssl rand -hex 32`)                                    |
+| `LOG_LEVEL`                   | `info`  | Nível de log do Pino                                                                           |
+| `PERSIST_LEADS`               | `false` | Se `true`, salva leads no banco via Prisma                                                     |
+| `OPEN_FINANCE_PROVIDER`       | —       | `pluggy` ou `belvo`                                                                            |
+| `OPEN_FINANCE_CLIENT_ID`      | —       | Client ID do provedor Open Finance                                                             |
+| `OPEN_FINANCE_CLIENT_SECRET`  | —       | Client Secret do provedor Open Finance                                                         |
+| `OPEN_FINANCE_WEBHOOK_SECRET` | —       | Segredo HMAC para verificação de webhooks                                                      |
+| `OPEN_FINANCE_MOCK`           | `false` | Se `true`, usa respostas mock (sem credenciais reais)                                          |
+
+## Deploy na Vercel (Neon ou Supabase)
+
+### 1. Criar o banco de dados PostgreSQL
+
+**Opção A — Neon (recomendado para Vercel):**
+
+1. Acesse [neon.tech](https://neon.tech) e crie um projeto.
+2. Copie a connection string no formato `postgresql://user:password@ep-xxx.region.aws.neon.tech/dbname?sslmode=require`.
+
+**Opção B — Supabase:**
+
+1. Acesse [supabase.com](https://supabase.com) e crie um projeto.
+2. Em **Settings → Database**, copie a URI de conexão do modo _Session_ (porta 5432).
+
+### 2. Configurar variáveis na Vercel
+
+No painel do seu projeto na Vercel (**Settings → Environment Variables**), adicione:
+
+| Variável          | Valor                                                        |
+| ----------------- | ------------------------------------------------------------ |
+| `DATABASE_URL`    | Connection string PostgreSQL obtida no passo 1               |
+| `NEXTAUTH_URL`    | URL do projeto na Vercel (ex.: `https://seu-app.vercel.app`) |
+| `NEXTAUTH_SECRET` | Saída de `openssl rand -hex 32`                              |
+
+### 3. Executar as migrations em produção
+
+Antes do primeiro deploy (ou ao modificar o schema), execute:
+
+```bash
+# Gera e aplica as migrations no banco remoto
+DATABASE_URL="<sua-connection-string>" pnpm prisma migrate deploy
+```
+
+### 4. Deploy
+
+```bash
+# Via CLI da Vercel
+vercel --prod
+```
+
+Ou conecte o repositório GitHub ao seu projeto na Vercel e cada push para `main` fará o deploy automaticamente.
 
 ## Conformidade
 
@@ -116,8 +158,11 @@ pnpm test:e2e
 ## Docker
 
 ```bash
+# Sobe o banco PostgreSQL e a aplicação Next.js
 docker compose up --build
 ```
+
+O `docker-compose.yml` inclui um serviço `db` (PostgreSQL 16) e aguarda sua disponibilidade antes de iniciar a aplicação (`healthcheck`).
 
 ## CI
 
