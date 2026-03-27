@@ -1,0 +1,55 @@
+{
+  "name": "databank-site",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "format": "prettier --write .",
+    "test": "jest --passWithNoTests",
+    "test:e2e": "playwright test",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.14.0",
+    "next": "14.2.29",
+    "pino": "^9.2.0",
+    "pino-pretty": "^11.2.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.44.1",
+    "@testing-library/jest-dom": "^6.4.6",
+    "@testing-library/react": "^16.0.0",
+    "@testing-library/user-event": "^14.5.2",
+    "@types/node": "^20.14.9",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "14.2.29",
+    "husky": "^9.0.11",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "lint-staged": "^15.2.7",
+    "prettier": "^3.3.2",
+    "prisma": "^5.14.0",
+    "tailwindcss": "^3.4.4",
+    "postcss": "^8.4.39",
+    "autoprefixer": "^10.4.19",
+    "typescript": "^5.5.3"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,css}": [
+      "prettier --write"
+    ]
+  }
+}
