@@ -4,7 +4,7 @@ Site institucional da startup **DataBank** — plataforma de analytics e intelig
 
 ## Stack
 
-- **Next.js 14** (App Router) + TypeScript + Tailwind CSS
+- **Next.js 15** (App Router) + TypeScript + Tailwind CSS
 - **Prisma** (SQLite) para persistência de leads
 - **Pino** para logging estruturado
 - **Jest + Testing Library** para testes unitários
