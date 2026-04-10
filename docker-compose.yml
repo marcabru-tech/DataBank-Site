@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_DB: databank
       POSTGRES_USER: databank
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-databank}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
@@ -25,7 +25,7 @@ services:
       db:
         condition: service_healthy
     environment:
-      - DATABASE_URL=postgresql://databank:${POSTGRES_PASSWORD:-databank}@db:5432/databank
+      - DATABASE_URL=postgresql://databank:${POSTGRES_PASSWORD}@db:5432/databank
       - LOG_LEVEL=info
       - PERSIST_LEADS=false
 
